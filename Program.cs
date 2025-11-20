@@ -36,6 +36,9 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 
 // 6) Register your own services (we'll create TransactionService next)
 // builder.Services.AddSingleton<TransactionService>();
+
+builder.Services.AddSingleton<InternalAuditTestService>();
+builder.Services.AddSingleton<GrcExceptionLogService>();
 builder.Services.AddSingleton<ProcessService>();
 builder.Services.AddSingleton<OwnershipService>(); 
 builder.Services.AddSingleton<CosoControlEnvironmentService>();
@@ -48,8 +51,7 @@ builder.Services.AddSingleton<ControlAssessmentService>();
 builder.Services.AddSingleton<RiskAssessmentResidualRiskService>();
 builder.Services.AddSingleton<SoxService>();
 builder.Services.AddSingleton<FinancialStatementAssertionService>();
-builder.Services.AddSingleton<InternalAuditTestService>();
-builder.Services.AddSingleton<GrcExceptionLogService>();
+
 
 
 
