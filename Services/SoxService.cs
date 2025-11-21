@@ -28,6 +28,7 @@ namespace finance_management_backend.Services
         public async Task<Sox> CreateAsync(Sox item)
         {
             item.Id = null; // let Mongo generate Id
+            item.Date = DateTime.UtcNow; // NEW: set current date/time
             await _sox.InsertOneAsync(item);
             return item;
         }
@@ -55,6 +56,8 @@ namespace finance_management_backend.Services
             foreach (var s in list)
             {
                 s.Id = null;
+                  if (s.Date == default) // if not provided, set it
+                            s.Date = DateTime.UtcNow;
             }
 
             await _sox.InsertManyAsync(list);

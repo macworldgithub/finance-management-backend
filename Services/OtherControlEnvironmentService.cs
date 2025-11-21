@@ -28,6 +28,7 @@ namespace finance_management_backend.Services
         public async Task<OtherControlEnvironment> CreateAsync(OtherControlEnvironment item)
         {
             item.Id = null; // let Mongo generate Id
+            item.Date = DateTime.UtcNow; // NEW: set current date/time
             await _other.InsertOneAsync(item);
             return item;
         }
@@ -55,6 +56,8 @@ namespace finance_management_backend.Services
             foreach (var c in list)
             {
                 c.Id = null;
+                  if (c.Date == default) // if not provided, set it
+                            c.Date = DateTime.UtcNow;
             }
 
             await _other.InsertManyAsync(list);

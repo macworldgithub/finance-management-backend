@@ -28,6 +28,7 @@ namespace finance_management_backend.Services
         public async Task<GrcExceptionLog> CreateAsync(GrcExceptionLog item)
         {
             item.Id = null; // let Mongo generate Id
+            item.Date = DateTime.UtcNow; // NEW: set current date/time
             await _logs.InsertOneAsync(item);
             return item;
         }
@@ -55,6 +56,9 @@ namespace finance_management_backend.Services
             foreach (var x in list)
             {
                 x.Id = null;
+
+                  if (x.Date == default) // if not provided, set it
+                            x.Date = DateTime.UtcNow;
             }
 
             await _logs.InsertManyAsync(list);

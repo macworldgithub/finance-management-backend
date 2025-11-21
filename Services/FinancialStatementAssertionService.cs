@@ -30,6 +30,7 @@ namespace finance_management_backend.Services
         public async Task<FinancialStatementAssertion> CreateAsync(FinancialStatementAssertion item)
         {
             item.Id = null; // let Mongo generate Id
+            item.Date = DateTime.UtcNow; // NEW: set current date/time
             await _assertions.InsertOneAsync(item);
             return item;
         }
@@ -58,6 +59,9 @@ namespace finance_management_backend.Services
             foreach (var a in list)
             {
                 a.Id = null;
+
+                  if (a.Date == default) // if not provided, set it
+                            a.Date = DateTime.UtcNow;
             }
 
             await _assertions.InsertManyAsync(list);

@@ -29,6 +29,7 @@ namespace finance_management_backend.Services
         {
             // let Mongo generate Id if null
             process.Id = null;
+            process.Date = DateTime.UtcNow; // NEW: set current date/time
             await _processes.InsertOneAsync(process);
             return process;
         }
@@ -57,6 +58,9 @@ namespace finance_management_backend.Services
             foreach (var p in list)
             {
                 p.Id = null; // force Mongo to generate ids
+
+                  if (p.Date == default) // if not provided, set it
+                            p.Date = DateTime.UtcNow;
             }
 
             await _processes.InsertManyAsync(list);

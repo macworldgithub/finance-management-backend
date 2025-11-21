@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json.Serialization;
+using System; // make sure this is at the top
 
 namespace finance_management_backend.Models
 {
@@ -10,6 +11,11 @@ namespace finance_management_backend.Models
         [BsonRepresentation(BsonType.ObjectId)]
         [JsonPropertyName("Id")]
         public string? Id { get; set; }
+
+
+            [BsonElement("Date")]
+    [JsonPropertyName("Date")]
+    public DateTime Date { get; set; }
 
         // No (key like 5.1)
         [BsonElement("No")]

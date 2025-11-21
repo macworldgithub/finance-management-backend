@@ -11,6 +11,11 @@ namespace finance_management_backend.Models
         [JsonPropertyName("Id")]
         public string? Id { get; set; }
 
+
+            [BsonElement("Date")]
+    [JsonPropertyName("Date")]
+    public DateTime Date { get; set; }
+
         [BsonElement("No")]
         [JsonPropertyName("No")]
         public double No { get; set; }

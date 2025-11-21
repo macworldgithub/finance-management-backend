@@ -17,13 +17,16 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/internalaudittests
-        [HttpGet]
-        public async Task<ActionResult<List<InternalAuditTest>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+      // GET: api/internalaudittests?page=1&search=kyc
+[HttpGet]
+public async Task<ActionResult<PagedResult<InternalAuditTest>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
+
 
         // GET: api/internalaudittests/{id}
         [HttpGet("{id}")]

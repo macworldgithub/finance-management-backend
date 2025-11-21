@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson; // 👈 add this
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,48 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<InternalAuditTest>> GetAllAsync()
-        {
-            return await _tests.Find(_ => true).ToListAsync();
-        }
+      public async Task<PagedResult<InternalAuditTest>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+
+    if (page < 1) page = 1;
+
+    // ---- Build filter for "search bar" ----
+    var filter = Builders<InternalAuditTest>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<InternalAuditTest>.Filter.Or(
+            Builders<InternalAuditTest>.Filter.Regex(x => x.Process, regex),
+            Builders<InternalAuditTest>.Filter.Regex(x => x.Check, regex),
+            Builders<InternalAuditTest>.Filter.Regex(x => x.InternalAuditTestName, regex),
+            Builders<InternalAuditTest>.Filter.Regex(x => x.SampleSize, regex)
+        );
+    }
+
+    var totalItems = await _tests.CountDocumentsAsync(filter);
+
+    var items = await _tests
+        .Find(filter)
+        .SortByDescending(x => x.Date)      // 👈 latest first
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<InternalAuditTest>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<InternalAuditTest?> GetByIdAsync(string id)
         {
@@ -28,6 +67,7 @@ namespace finance_management_backend.Services
         public async Task<InternalAuditTest> CreateAsync(InternalAuditTest item)
         {
             item.Id = null; // let Mongo generate Id
+            item.Date = DateTime.UtcNow; // NEW: set current date/time
             await _tests.InsertOneAsync(item);
             return item;
         }
@@ -55,6 +95,8 @@ namespace finance_management_backend.Services
             foreach (var t in list)
             {
                 t.Id = null;
+                  if (t.Date == default) // if not provided, set it
+                            t.Date = DateTime.UtcNow;
             }
 
             await _tests.InsertManyAsync(list);

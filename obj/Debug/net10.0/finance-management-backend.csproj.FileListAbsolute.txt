@@ -40,3 +40,4 @@ D:\finance-management-backend\obj\Debug\net10.0\ref\finance-management-backend.d
 D:\finance-management-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\finance-management-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\finance-management-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\finance-management-backend\obj\Debug\net10.0\finance-management-backend.sourcelink.json

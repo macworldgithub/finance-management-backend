@@ -28,6 +28,7 @@ namespace finance_management_backend.Services
         public async Task<RiskResponse> CreateAsync(RiskResponse item)
         {
             item.Id = null; // let Mongo generate Id
+            item.Date = DateTime.UtcNow; // NEW: set current date/time
             await _riskResponses.InsertOneAsync(item);
             return item;
         }
@@ -55,6 +56,8 @@ namespace finance_management_backend.Services
             foreach (var r in list)
             {
                 r.Id = null;
+                  if (r.Date == default) // if not provided, set it
+                            r.Date = DateTime.UtcNow;
             }
 
             await _riskResponses.InsertManyAsync(list);

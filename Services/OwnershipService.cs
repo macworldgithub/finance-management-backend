@@ -28,6 +28,7 @@ namespace finance_management_backend.Services
         public async Task<Ownership> CreateAsync(Ownership ownership)
         {
             ownership.Id = null; // let Mongo generate Id
+            ownership.Date = DateTime.UtcNow; // NEW: set current date/time
             await _ownerships.InsertOneAsync(ownership);
             return ownership;
         }
@@ -55,6 +56,8 @@ namespace finance_management_backend.Services
             foreach (var o in list)
             {
                 o.Id = null;
+                  if (o.Date == default) // if not provided, set it
+                            o.Date = DateTime.UtcNow;
             }
 
             await _ownerships.InsertManyAsync(list);
