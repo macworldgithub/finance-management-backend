@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -17,10 +18,61 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<IntosaiIfacControlEnvironment>> GetAllAsync()
-        {
-            return await _intosai.Find(_ => true).ToListAsync();
-        }
+        public async Task<PagedResult<IntosaiIfacControlEnvironment>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<IntosaiIfacControlEnvironment>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<IntosaiIfacControlEnvironment>.Filter.Or(
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.Process, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.IntegrityAndEthicalValues, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.CommitmentToCompetence, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.ManagementsPhilosophyAndOperatingStyle, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.OrganizationalStructure, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.AssignmentOfAuthorityAndResponsibility, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.HumanResourcePoliciesAndPractices, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.BoardOrAuditCommitteeParticipation, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.ManagementControlMethods, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.ExternalInfluences, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.ManagementsCommitmentToInternalControl, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.CommunicationAndEnforcementOfIntegrityAndEthicalValues, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.EmployeeAwarenessAndUnderstanding, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.AccountabilityAndPerformanceMeasurement, regex),
+            Builders<IntosaiIfacControlEnvironment>.Filter.Regex(x => x.CommitmentToTransparencyAndOpenness, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _intosai.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _intosai
+        .Find(filter)
+        .SortByDescending(x => x.Date)   // latest first
+        .ThenByDescending(x => x.No)     // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<IntosaiIfacControlEnvironment>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<IntosaiIfacControlEnvironment?> GetByIdAsync(string id)
         {

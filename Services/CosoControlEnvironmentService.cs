@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,52 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<CosoControlEnvironment>> GetAllAsync()
-        {
-            return await _coso.Find(_ => true).ToListAsync();
-        }
+       public async Task<PagedResult<CosoControlEnvironment>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<CosoControlEnvironment>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<CosoControlEnvironment>.Filter.Or(
+            Builders<CosoControlEnvironment>.Filter.Regex(x => x.Process, regex),
+            Builders<CosoControlEnvironment>.Filter.Regex(x => x.IntegrityAndEthicalValues, regex),
+            Builders<CosoControlEnvironment>.Filter.Regex(x => x.BoardOversight, regex),
+            Builders<CosoControlEnvironment>.Filter.Regex(x => x.OrganizationalStructure, regex),
+            Builders<CosoControlEnvironment>.Filter.Regex(x => x.CommitmentToCompetence, regex),
+            Builders<CosoControlEnvironment>.Filter.Regex(x => x.ManagementPhilosophy, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _coso.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _coso
+        .Find(filter)
+        .SortByDescending(x => x.Date)  // latest first
+        .ThenByDescending(x => x.No)
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<CosoControlEnvironment>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<CosoControlEnvironment?> GetByIdAsync(string id)
         {

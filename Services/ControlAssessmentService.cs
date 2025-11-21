@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,52 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<ControlAssessment>> GetAllAsync()
-        {
-            return await _assessments.Find(_ => true).ToListAsync();
-        }
+    public async Task<PagedResult<ControlAssessment>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<ControlAssessment>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<ControlAssessment>.Filter.Or(
+            Builders<ControlAssessment>.Filter.Regex(x => x.Process, regex),
+            Builders<ControlAssessment>.Filter.Regex(x => x.LevelOfResponsibilityOperatingLevel, regex),
+            Builders<ControlAssessment>.Filter.Regex(x => x.CosoPrincipleNumber, regex),
+            Builders<ControlAssessment>.Filter.Regex(x => x.OperationalApproach, regex),
+            Builders<ControlAssessment>.Filter.Regex(x => x.OperationalFrequency, regex),
+            Builders<ControlAssessment>.Filter.Regex(x => x.ControlClassification, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _assessments.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _assessments
+        .Find(filter)
+        .SortByDescending(x => x.Date)     // latest first
+        .ThenByDescending(x => x.No)       // tie-breaker if same date
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<ControlAssessment>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<ControlAssessment?> GetByIdAsync(string id)
         {

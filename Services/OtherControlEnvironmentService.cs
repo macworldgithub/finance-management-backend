@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,61 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<OtherControlEnvironment>> GetAllAsync()
-        {
-            return await _other.Find(_ => true).ToListAsync();
-        }
+    public async Task<PagedResult<OtherControlEnvironment>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<OtherControlEnvironment>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<OtherControlEnvironment>.Filter.Or(
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.Process, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.ResponsibilityDelegationMatrix, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.SegregationOfDuties, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.ReportingLines, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.Mission, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.VisionAndValues, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.GoalsAndObjectives, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.StructuresAndSystems, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.PoliciesAndProcedures, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.Processes, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.IntegrityAndEthicalValues, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.OversightStructure, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.Standards, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.Methodologies, regex),
+            Builders<OtherControlEnvironment>.Filter.Regex(x => x.RulesAndRegulations, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _other.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _other
+        .Find(filter)
+        .SortByDescending(x => x.Date)   // latest first
+        .ThenByDescending(x => x.No)     // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<OtherControlEnvironment>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<OtherControlEnvironment?> GetByIdAsync(string id)
         {

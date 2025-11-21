@@ -17,13 +17,16 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/riskresponses
-        [HttpGet]
-        public async Task<ActionResult<List<RiskResponse>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+     // GET: api/riskresponses?page=1&search=mitigate
+[HttpGet]
+public async Task<ActionResult<PagedResult<RiskResponse>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
+
 
         // GET: api/riskresponses/{id}
         [HttpGet("{id}")]

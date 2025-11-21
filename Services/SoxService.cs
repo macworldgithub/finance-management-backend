@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,48 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<Sox>> GetAllAsync()
-        {
-            return await _sox.Find(_ => true).ToListAsync();
-        }
+public async Task<PagedResult<Sox>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<Sox>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<Sox>.Filter.Or(
+            Builders<Sox>.Filter.Regex(x => x.Process, regex),
+            Builders<Sox>.Filter.Regex(x => x.SoxControlActivity, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _sox.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _sox
+        .Find(filter)
+        .SortByDescending(x => x.Date)   // newest first
+        .ThenByDescending(x => x.No)     // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<Sox>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<Sox?> GetByIdAsync(string id)
         {

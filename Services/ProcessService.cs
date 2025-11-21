@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,50 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<Process>> GetAllAsync()
-        {
-            return await _processes.Find(_ => true).ToListAsync();
-        }
+     public async Task<PagedResult<Process>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<Process>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<Process>.Filter.Or(
+            Builders<Process>.Filter.Regex(x => x.ProcessName, regex),
+            Builders<Process>.Filter.Regex(x => x.ProcessDescription, regex),
+            Builders<Process>.Filter.Regex(x => x.ProcessObjectives, regex),
+            Builders<Process>.Filter.Regex(x => x.ProcessSeverityLevels, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _processes.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _processes
+        .Find(filter)
+        .SortByDescending(x => x.Date)   // newest first
+        .ThenByDescending(x => x.No)     // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<Process>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<Process?> GetByIdAsync(string id)
         {

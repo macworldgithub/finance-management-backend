@@ -17,13 +17,15 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/cosocontrolenvironments
-        [HttpGet]
-        public async Task<ActionResult<List<CosoControlEnvironment>>> GetAll()
-        {
-            var list = await _cosoService.GetAllAsync();
-            return Ok(list);
-        }
+      // GET: api/cosocontrolenvironments?page=1&search=board
+[HttpGet]
+public async Task<ActionResult<PagedResult<CosoControlEnvironment>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _cosoService.GetAllAsync(page, search);
+    return Ok(result);
+}
 
         // GET: api/cosocontrolenvironments/{id}
         [HttpGet("{id}")]

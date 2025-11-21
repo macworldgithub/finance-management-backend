@@ -17,13 +17,16 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/financialstatementassertions
-        [HttpGet]
-        public async Task<ActionResult<List<FinancialStatementAssertion>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+      // GET: api/financialstatementassertions?page=1&search=revenue
+[HttpGet]
+public async Task<ActionResult<PagedResult<FinancialStatementAssertion>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
+
 
         // GET: api/financialstatementassertions/{id}
         [HttpGet("{id}")]

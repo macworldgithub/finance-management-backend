@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson; 
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,58 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<Ownership>> GetAllAsync()
-        {
-            return await _ownerships.Find(_ => true).ToListAsync();
-        }
+    public async Task<PagedResult<Ownership>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<Ownership>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<Ownership>.Filter.Or(
+            Builders<Ownership>.Filter.Regex(x => x.MainProcess, regex),
+            Builders<Ownership>.Filter.Regex(x => x.Activity, regex),
+            Builders<Ownership>.Filter.Regex(x => x.Process, regex),
+            Builders<Ownership>.Filter.Regex(x => x.ProcessStage, regex),
+            Builders<Ownership>.Filter.Regex(x => x.Functions, regex),
+            Builders<Ownership>.Filter.Regex(x => x.ClientSegmentOrFunctionalSegment, regex),
+            Builders<Ownership>.Filter.Regex(x => x.OperationalUnit, regex),
+            Builders<Ownership>.Filter.Regex(x => x.Division, regex),
+            Builders<Ownership>.Filter.Regex(x => x.Entity, regex),
+            Builders<Ownership>.Filter.Regex(x => x.UnitOrDepartment, regex),
+            Builders<Ownership>.Filter.Regex(x => x.ProductClass, regex),
+            Builders<Ownership>.Filter.Regex(x => x.ProductName, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _ownerships.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _ownerships
+        .Find(filter)
+        .SortByDescending(x => x.Date)   // latest first
+        .ThenByDescending(x => x.No)     // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<Ownership>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<Ownership?> GetByIdAsync(string id)
         {

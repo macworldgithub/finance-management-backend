@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -14,11 +15,48 @@ namespace finance_management_backend.Services
         }
 
         // ===== Single-item CRUD =====
+public async Task<PagedResult<RiskResponse>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
 
-        public async Task<List<RiskResponse>> GetAllAsync()
-        {
-            return await _riskResponses.Find(_ => true).ToListAsync();
-        }
+    // ----- Search filter -----
+    var filter = Builders<RiskResponse>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<RiskResponse>.Filter.Or(
+            Builders<RiskResponse>.Filter.Regex(x => x.Process, regex),
+            Builders<RiskResponse>.Filter.Regex(x => x.TypeOfRiskResponse, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _riskResponses.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _riskResponses
+        .Find(filter)
+        .SortByDescending(x => x.Date)   // newest first
+        .ThenByDescending(x => x.No)     // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<RiskResponse>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<RiskResponse?> GetByIdAsync(string id)
         {

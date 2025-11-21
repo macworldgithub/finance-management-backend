@@ -17,13 +17,15 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/grcexceptionlogs
-        [HttpGet]
-        public async Task<ActionResult<List<GrcExceptionLog>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+    // GET: api/grcexceptionlogs?page=1&search=onboarding
+[HttpGet]
+public async Task<ActionResult<PagedResult<GrcExceptionLog>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
 
         // GET: api/grcexceptionlogs/{id}
         [HttpGet("{id}")]

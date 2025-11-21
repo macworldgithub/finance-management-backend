@@ -17,13 +17,16 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/riskassessmentresidualrisks
-        [HttpGet]
-        public async Task<ActionResult<List<RiskAssessmentResidualRisk>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+   // GET: api/riskassessmentresidualrisks?page=1&search=credit
+[HttpGet]
+public async Task<ActionResult<PagedResult<RiskAssessmentResidualRisk>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
+
 
         // GET: api/riskassessmentresidualrisks/{id}
         [HttpGet("{id}")]

@@ -19,11 +19,15 @@ namespace finance_management_backend.Controllers
 
         // GET: api/controlactivities
         [HttpGet]
-        public async Task<ActionResult<List<ControlActivity>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+    // GET: api/controlactivities?page=1&search=onboarding
+[HttpGet]
+public async Task<ActionResult<PagedResult<ControlActivity>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
 
         // GET: api/controlactivities/{id}
         [HttpGet("{id}")]

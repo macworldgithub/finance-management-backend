@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json.Serialization;
+using System; // make sure this is at the top
 
 namespace finance_management_backend.Models
 {

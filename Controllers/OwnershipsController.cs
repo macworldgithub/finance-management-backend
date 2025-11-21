@@ -17,13 +17,15 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/ownerships
-        [HttpGet]
-        public async Task<ActionResult<List<Ownership>>> GetAll()
-        {
-            var list = await _ownershipService.GetAllAsync();
-            return Ok(list);
-        }
+// GET: api/ownerships?page=1&search=onboarding
+[HttpGet]
+public async Task<ActionResult<PagedResult<Ownership>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _ownershipService.GetAllAsync(page, search);
+    return Ok(result);
+}
 
         // GET: api/ownerships/{id}
         [HttpGet("{id}")]

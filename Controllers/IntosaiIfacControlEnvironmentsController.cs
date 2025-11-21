@@ -17,13 +17,14 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/intosaifaccontrolenvironments
-        [HttpGet]
-        public async Task<ActionResult<List<IntosaiIfacControlEnvironment>>> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            return Ok(list);
-        }
+      [HttpGet]
+public async Task<ActionResult<PagedResult<IntosaiIfacControlEnvironment>>> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] string? search = null)
+{
+    var result = await _service.GetAllAsync(page, search);
+    return Ok(result);
+}
 
         // GET: api/intosaifaccontrolenvironments/{id}
         [HttpGet("{id}")]

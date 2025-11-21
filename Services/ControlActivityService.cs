@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
+using MongoDB.Bson; 
 
 namespace finance_management_backend.Services
 {
@@ -15,10 +16,54 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-        public async Task<List<ControlActivity>> GetAllAsync()
-        {
-            return await _controls.Find(_ => true).ToListAsync();
-        }
+  public async Task<PagedResult<ControlActivity>> GetAllAsync(int page = 1, string? search = null)
+{
+    const int PageSize = 10;
+    if (page < 1) page = 1;
+
+    // ----- Search filter -----
+    var filter = Builders<ControlActivity>.Filter.Empty;
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
+
+        filter = Builders<ControlActivity>.Filter.Or(
+            Builders<ControlActivity>.Filter.Regex(x => x.Process, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.ControlObjectives, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.ControlRef, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.ControlDefinition, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.ControlDescription, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.ControlResponsibility, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.KeyControl, regex),
+            Builders<ControlActivity>.Filter.Regex(x => x.ZeroTolerance, regex)
+        );
+    }
+
+    // ----- Count for pagination -----
+    var totalItems = await _controls.CountDocumentsAsync(filter);
+
+    // ----- Query page, latest on top -----
+    var items = await _controls
+        .Find(filter)
+        .SortByDescending(x => x.Date)          // latest first
+        .ThenByDescending(x => x.No)           // tie-breaker
+        .Skip((page - 1) * PageSize)
+        .Limit(PageSize)
+        .ToListAsync();
+
+    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+
+    return new PagedResult<ControlActivity>
+    {
+        Page = page,
+        PageSize = PageSize,
+        TotalItems = totalItems,
+        TotalPages = totalPages,
+        Items = items
+    };
+}
+
 
         public async Task<ControlActivity?> GetByIdAsync(string id)
         {
