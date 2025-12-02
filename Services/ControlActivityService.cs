@@ -16,7 +16,10 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-  public async Task<PagedResult<ControlActivity>> GetAllAsync(int page = 1, string? search = null)
+ public async Task<PagedResult<ControlActivity>> GetAllAsync(
+    int page = 1,
+    string? search = null,
+    bool sortByNoAsc = false)
 {
     const int PageSize = 10;
     if (page < 1) page = 1;
@@ -43,11 +46,24 @@ namespace finance_management_backend.Services
     // ----- Count for pagination -----
     var totalItems = await _controls.CountDocumentsAsync(filter);
 
-    // ----- Query page, latest on top -----
-    var items = await _controls
-        .Find(filter)
-        .SortByDescending(x => x.Date)          // latest first
-        .ThenByDescending(x => x.No)           // tie-breaker
+    // ----- Build sort definition -----
+    IFindFluent<ControlActivity, ControlActivity> query = _controls.Find(filter);
+
+    if (sortByNoAsc)
+    {
+        // sort by No ascending
+        query = query.SortBy(x => x.No);
+    }
+    else
+    {
+        // default: latest Date first, then No desc
+        query = query
+            .SortByDescending(x => x.Date)
+            .ThenByDescending(x => x.No);
+    }
+
+    // ----- Query page -----
+    var items = await query
         .Skip((page - 1) * PageSize)
         .Limit(PageSize)
         .ToListAsync();
