@@ -16,10 +16,14 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-public async Task<PagedResult<Sox>> GetAllAsync(int page = 1, string? search = null)
+public async Task<PagedResult<Sox>> GetAllAsync(
+    int page = 1,
+    string? search = null,
+    int pageSize = 10,
+    bool sortByNoAsc = false)
 {
-    const int PageSize = 10;
     if (page < 1) page = 1;
+    if (pageSize <= 0) pageSize = 10;
 
     // ----- Search filter -----
     var filter = Builders<Sox>.Filter.Empty;
@@ -37,21 +41,34 @@ public async Task<PagedResult<Sox>> GetAllAsync(int page = 1, string? search = n
     // ----- Count for pagination -----
     var totalItems = await _sox.CountDocumentsAsync(filter);
 
-    // ----- Query page, latest on top -----
-    var items = await _sox
-        .Find(filter)
-        .SortByDescending(x => x.Date)   // newest first
-        .ThenByDescending(x => x.No)     // tie-breaker
-        .Skip((page - 1) * PageSize)
-        .Limit(PageSize)
+    // ----- Build sort definition -----
+    IFindFluent<Sox, Sox> query = _sox.Find(filter);
+
+    if (sortByNoAsc)
+    {
+        // sort by No ascending
+        query = query.SortBy(x => x.No);
+    }
+    else
+    {
+        // default: latest Date first, then No desc
+        query = query
+            .SortByDescending(x => x.Date)
+            .ThenByDescending(x => x.No);
+    }
+
+    // ----- Query page -----
+    var items = await query
+        .Skip((page - 1) * pageSize)
+        .Limit(pageSize)
         .ToListAsync();
 
-    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+    var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
     return new PagedResult<Sox>
     {
         Page = page,
-        PageSize = PageSize,
+        PageSize = pageSize,
         TotalItems = totalItems,
         TotalPages = totalPages,
         Items = items

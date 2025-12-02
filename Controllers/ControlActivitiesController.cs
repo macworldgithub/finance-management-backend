@@ -24,9 +24,10 @@ namespace finance_management_backend.Controllers
 public async Task<ActionResult<PagedResult<ControlActivity>>> GetAll(
     [FromQuery] int page = 1,
     [FromQuery] string? search = null,
+    [FromQuery] int pageSize = 10,
     [FromQuery] bool sortByNoAsc = false)
 {
-    var result = await _service.GetAllAsync(page, search, sortByNoAsc);
+    var result = await _service.GetAllAsync(page, search,pageSize ,sortByNoAsc);
     return Ok(result);
 }
 

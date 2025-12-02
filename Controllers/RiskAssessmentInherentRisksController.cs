@@ -17,15 +17,18 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/riskassessmentinherentrisk?page=1&search=credit
+// GET: api/riskassessmentinherentrisk?page=1&search=credit&pageSize=20&sortByNoAsc=true
 [HttpGet]
 public async Task<ActionResult<PagedResult<RiskAssessmentInherentRisk>>> GetAll(
     [FromQuery] int page = 1,
-    [FromQuery] string? search = null)
+    [FromQuery] string? search = null,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] bool sortByNoAsc = false)
 {
-    var result = await _service.GetAllAsync(page, search);
+    var result = await _service.GetAllAsync(page, search, pageSize, sortByNoAsc);
     return Ok(result);
 }
+
 
   
 

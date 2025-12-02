@@ -17,15 +17,18 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-    // GET: api/processes?page=1&search=onboarding
+// GET: api/processes?page=1&search=onboarding&pageSize=20&sortByNoAsc=true
 [HttpGet]
 public async Task<ActionResult<PagedResult<Process>>> GetAll(
     [FromQuery] int page = 1,
-    [FromQuery] string? search = null)
+    [FromQuery] string? search = null,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] bool sortByNoAsc = false)
 {
-    var result = await _processService.GetAllAsync(page, search);
+    var result = await _processService.GetAllAsync(page, search, pageSize, sortByNoAsc);
     return Ok(result);
 }
+
 
         // GET: api/processes/{id}
         [HttpGet("{id}")]

@@ -18,14 +18,18 @@ namespace finance_management_backend.Controllers
         // ===== Single-item CRUD =====
 
       // GET: api/cosocontrolenvironments?page=1&search=board
+// GET: api/cosocontrolenvironments?page=1&search=integrity&pageSize=20&sortByNoAsc=true
 [HttpGet]
 public async Task<ActionResult<PagedResult<CosoControlEnvironment>>> GetAll(
     [FromQuery] int page = 1,
-    [FromQuery] string? search = null)
+    [FromQuery] string? search = null,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] bool sortByNoAsc = false)
 {
-    var result = await _cosoService.GetAllAsync(page, search);
+    var result = await _cosoService.GetAllAsync(page, search, pageSize, sortByNoAsc);
     return Ok(result);
 }
+
 
         // GET: api/cosocontrolenvironments/{id}
         [HttpGet("{id}")]

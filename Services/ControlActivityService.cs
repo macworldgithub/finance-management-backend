@@ -18,10 +18,10 @@ namespace finance_management_backend.Services
 
  public async Task<PagedResult<ControlActivity>> GetAllAsync(
     int page = 1,
-    string? search = null,
+    string? search = null, int PageSize = 10,
     bool sortByNoAsc = false)
 {
-    const int PageSize = 10;
+    // const int PageSize = 10;
     if (page < 1) page = 1;
 
     // ----- Search filter -----

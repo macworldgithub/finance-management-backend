@@ -16,11 +16,14 @@ namespace finance_management_backend.Services
 
         // ===== Single-item CRUD =====
 
-      public async Task<PagedResult<InternalAuditTest>> GetAllAsync(int page = 1, string? search = null)
+public async Task<PagedResult<InternalAuditTest>> GetAllAsync(
+    int page = 1,
+    string? search = null,
+    int pageSize = 10,
+    bool sortByNoAsc = false)
 {
-    const int PageSize = 10;
-
     if (page < 1) page = 1;
+    if (pageSize <= 0) pageSize = 10;
 
     // ---- Build filter for "search bar" ----
     var filter = Builders<InternalAuditTest>.Filter.Empty;
@@ -39,19 +42,34 @@ namespace finance_management_backend.Services
 
     var totalItems = await _tests.CountDocumentsAsync(filter);
 
-    var items = await _tests
-        .Find(filter)
-        .SortByDescending(x => x.Date)      // 👈 latest first
-        .Skip((page - 1) * PageSize)
-        .Limit(PageSize)
+    // ---- Sorting ----
+    IFindFluent<InternalAuditTest, InternalAuditTest> query = _tests.Find(filter);
+
+    if (sortByNoAsc)
+    {
+        // sort by No ascending
+        query = query.SortBy(x => x.No);
+    }
+    else
+    {
+        // latest first, then No desc
+        query = query
+            .SortByDescending(x => x.Date)
+            .ThenByDescending(x => x.No);
+    }
+
+    // ---- Paging ----
+    var items = await query
+        .Skip((page - 1) * pageSize)
+        .Limit(pageSize)
         .ToListAsync();
 
-    var totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+    var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
     return new PagedResult<InternalAuditTest>
     {
         Page = page,
-        PageSize = PageSize,
+        PageSize = pageSize,
         TotalItems = totalItems,
         TotalPages = totalPages,
         Items = items

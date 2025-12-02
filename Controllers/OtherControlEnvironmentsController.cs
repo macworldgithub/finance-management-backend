@@ -17,16 +17,18 @@ namespace finance_management_backend.Controllers
 
         // ===== Single-item CRUD =====
 
-        // GET: api/othercontrolenvironments
-   // GET: api/othercontrolenvironments?page=1&search=mission
+// GET: api/othercontrolenvironments?page=1&search=ethics&pageSize=20&sortByNoAsc=true
 [HttpGet]
 public async Task<ActionResult<PagedResult<OtherControlEnvironment>>> GetAll(
     [FromQuery] int page = 1,
-    [FromQuery] string? search = null)
+    [FromQuery] string? search = null,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] bool sortByNoAsc = false)
 {
-    var result = await _service.GetAllAsync(page, search);
+    var result = await _service.GetAllAsync(page, search, pageSize, sortByNoAsc);
     return Ok(result);
 }
+
 
 
         // GET: api/othercontrolenvironments/{id}
