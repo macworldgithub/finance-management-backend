@@ -52,6 +52,10 @@
               "target": "Package",
               "version": "[3.5.1, )"
             },
+            "PuppeteerSharp": {
+              "target": "Package",
+              "version": "[20.2.4, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.1, )"
