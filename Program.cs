@@ -48,7 +48,8 @@ builder.Services.AddSingleton<FinancialStatementAssertionService>();
 builder.Services.AddSingleton<AssessmentOfAdequacyService>();
 builder.Services.AddSingleton<AssessmentOfEffectivenessService>();
 builder.Services.AddSingleton<AssessmentOfEfficiencyService>();
-builder.Services.AddScoped<ProcessSeverityService>();
+builder.Services.AddSingleton<ProcessSeverityService>();
+builder.Services.AddSingleton<ChartPdfService>();
 var app = builder.Build();
 app.UseCors(x => x
     .AllowAnyHeader()
