@@ -1,6 +1,6 @@
+using MongoDB.Bson;
 using MongoDB.Driver;
 using finance_management_backend.Models;
-using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
@@ -79,10 +79,10 @@ namespace finance_management_backend.Services
         public async Task<List<ProcessSeverity>> CreateManyAsync(IEnumerable<ProcessSeverity> items)
         {
             var list = items.ToList();
-            foreach (var i in list)
+            foreach (var item in list)
             {
-                i.Id = null;
-                if (i.Date == default) i.Date = DateTime.UtcNow;
+                item.Id = null;
+                if (item.Date == default) item.Date = DateTime.UtcNow;
             }
             await _collection.InsertManyAsync(list);
             return list;

@@ -6,7 +6,6 @@ namespace finance_management_backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // → api/processseverity
     public class ProcessSeverityController : ControllerBase
     {
         private readonly ProcessSeverityService _service;
@@ -65,7 +64,6 @@ namespace finance_management_backend.Controllers
             return NoContent();
         }
 
-        // Bulk create
         [HttpPost("bulk")]
         public async Task<ActionResult<List<ProcessSeverity>>> CreateMany(List<ProcessSeverity> items)
         {
