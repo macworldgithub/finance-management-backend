@@ -1,4 +1,4 @@
-@finance_management_backend_HostAddress = http://localhost:5006
+@finance_management_backend_HostAddress = http://localhost:7005
 
 GET {{finance_management_backend_HostAddress}}/weatherforecast/
 Accept: application/json

@@ -45,9 +45,16 @@ builder.Services.AddSingleton<ControlAssessmentService>();
 builder.Services.AddSingleton<RiskAssessmentResidualRiskService>();
 builder.Services.AddSingleton<SoxService>();
 builder.Services.AddSingleton<FinancialStatementAssertionService>();
+builder.Services.AddSingleton<AssessmentOfAdequacyService>();
+builder.Services.AddSingleton<AssessmentOfEffectivenessService>();
+builder.Services.AddSingleton<AssessmentOfEfficiencyService>();
 
 var app = builder.Build();
-
+app.UseCors(x => x
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowAnyOrigin()
+);
 // Optional: quick sanity check the DB
 using (var scope = app.Services.CreateScope())
 {
@@ -66,7 +73,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 // If you ever add auth:
 // app.UseAuthorization();
