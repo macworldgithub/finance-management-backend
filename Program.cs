@@ -1,7 +1,9 @@
 using MongoDB.Driver;
 using finance_management_backend.Settings;
 using finance_management_backend.Services;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1) Add controllers (for API endpoints)
@@ -29,7 +31,23 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     Console.WriteLine("✅ Connected to MongoDB at: " + mongoSettings.ConnectionString);
     return client.GetDatabase(mongoSettings.DatabaseName);
 });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!))
+        };
+    });
 
+builder.Services.AddAuthorization();
 // 6) Register your own services
 builder.Services.AddSingleton<InternalAuditTestService>();
 builder.Services.AddSingleton<GrcExceptionLogService>();
@@ -50,12 +68,16 @@ builder.Services.AddSingleton<AssessmentOfEffectivenessService>();
 builder.Services.AddSingleton<AssessmentOfEfficiencyService>();
 builder.Services.AddSingleton<ProcessSeverityService>();
 builder.Services.AddSingleton<ChartPdfService>();
+builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<JwtService>();
 var app = builder.Build();
 app.UseCors(x => x
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowAnyOrigin()
 );
+app.UseAuthentication();
+app.UseAuthorization();
 // Optional: quick sanity check the DB
 using (var scope = app.Services.CreateScope())
 {

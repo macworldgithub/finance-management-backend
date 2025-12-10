@@ -9,14 +9,16 @@
 
   <ItemGroup>
     <!-- Built-in OpenAPI support for ASP.NET Core 8 -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
-    
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <!-- MongoDB driver (you can upgrade later if needed) -->
     <PackageReference Include="MongoDB.Driver" Version="3.5.1" />
     <PackageReference Include="PuppeteerSharp" Version="20.2.4" />
 
     <!-- Swagger / Swashbuckle with .NET 8 support -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
 </Project>

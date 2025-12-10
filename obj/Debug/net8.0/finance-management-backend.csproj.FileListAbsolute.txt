@@ -79,5 +79,14 @@ D:\finance-management-backend\finance-management-backend\obj\Debug\net8.0\refint
 D:\finance-management-backend\finance-management-backend\obj\Debug\net8.0\finance-management-backend.pdb
 D:\finance-management-backend\finance-management-backend\obj\Debug\net8.0\finance-management-backend.genruntimeconfig.cache
 D:\finance-management-backend\finance-management-backend\obj\Debug\net8.0\ref\finance-management-backend.dll
-D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\appsettings.Development.json
 D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\appsettings.json
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\BCrypt.Net-Next.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\PuppeteerSharp.dll
+D:\finance-management-backend\finance-management-backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
