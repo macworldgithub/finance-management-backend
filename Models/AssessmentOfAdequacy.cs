@@ -39,10 +39,9 @@ namespace finance_management_backend.Models
         [BsonElement("AdequacyScore")]
         [JsonPropertyName("AdequacyScore")]
         public double AdequacyScore { get; set; } // 0-25 (calculated)
-
-        [BsonElement("TotalScore")]
-        [JsonPropertyName("TotalScore")]
-        public double TotalScore { get; set; } // same as AdequacyScore
+[BsonElement("TotalScore")]
+[JsonPropertyName("TotalScore")]
+public string TotalScore { get; set; } = string.Empty; // Now string
 
         [BsonElement("Scale")]
         [JsonPropertyName("Scale")]

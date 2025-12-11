@@ -41,8 +41,8 @@ namespace finance_management_backend.Models
         public double EffectivenessScore { get; set; } // 0-25
 
         [BsonElement("TotalScore")]
-        [JsonPropertyName("TotalScore")]
-        public double TotalScore { get; set; }
+[JsonPropertyName("TotalScore")]
+public string TotalScore { get; set; } = string.Empty; // Now string
 
         [BsonElement("Scale")]
         [JsonPropertyName("Scale")]
