@@ -5,7 +5,7 @@ using System;
 
 namespace finance_management_backend.Models
 {
-    public class ControlEnvironmentScoring
+    public class CosoControlEnvironmentScoring
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

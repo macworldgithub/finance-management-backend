@@ -4,16 +4,16 @@ using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
-    public class ControlEnvironmentScoringService
+    public class CosoControlEnvironmentScoringService
     {
-        private readonly IMongoCollection<ControlEnvironmentScoring> _collection;
+        private readonly IMongoCollection<CosoControlEnvironmentScoring> _collection;
 
-        public ControlEnvironmentScoringService(IMongoDatabase database)
+        public CosoControlEnvironmentScoringService(IMongoDatabase database)
         {
-            _collection = database.GetCollection<ControlEnvironmentScoring>("ControlEnvironmentScoring");
+            _collection = database.GetCollection<CosoControlEnvironmentScoring>("CosoControlEnvironmentScoring");
         }
 
-        public async Task<PagedResult<ControlEnvironmentScoring>> GetAllAsync(
+        public async Task<PagedResult<CosoControlEnvironmentScoring>> GetAllAsync(
             int page = 1,
             string? search = null,
             int pageSize = 10,
@@ -22,36 +22,36 @@ namespace finance_management_backend.Services
             if (page < 1) page = 1;
             if (pageSize <= 0) pageSize = 10;
 
-            var filter = Builders<ControlEnvironmentScoring>.Filter.Empty;
+            var filter = Builders<CosoControlEnvironmentScoring>.Filter.Empty;
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var regex = new BsonRegularExpression(search, "i");
-                filter = Builders<ControlEnvironmentScoring>.Filter.Or(
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.Process, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.IntegrityEthicalValues, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.BoardOversight, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.OrganizationalStructure, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.CommitmentToCompetence, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.ManagementPhilosophy, regex),
+                filter = Builders<CosoControlEnvironmentScoring>.Filter.Or(
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.Process, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.IntegrityEthicalValues, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.BoardOversight, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.OrganizationalStructure, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.CommitmentToCompetence, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.ManagementPhilosophy, regex),
 
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.IntegrityTotalScore, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.BoardTotalScore, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.OrgStructureTotalScore, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.CompetenceTotalScore, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.PhilosophyTotalScore, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.IntegrityTotalScore, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.BoardTotalScore, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.OrgStructureTotalScore, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.CompetenceTotalScore, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.PhilosophyTotalScore, regex),
 
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.IntegrityRating, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.BoardRating, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.OrgStructureRating, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.CompetenceRating, regex),
-                    Builders<ControlEnvironmentScoring>.Filter.Regex(x => x.PhilosophyRating, regex)
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.IntegrityRating, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.BoardRating, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.OrgStructureRating, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.CompetenceRating, regex),
+                    Builders<CosoControlEnvironmentScoring>.Filter.Regex(x => x.PhilosophyRating, regex)
                 );
             }
 
             var totalItems = await _collection.CountDocumentsAsync(filter);
 
-            IFindFluent<ControlEnvironmentScoring, ControlEnvironmentScoring> query = _collection.Find(filter);
+            IFindFluent<CosoControlEnvironmentScoring, CosoControlEnvironmentScoring> query = _collection.Find(filter);
 
             if (sortByNoAsc)
             {
@@ -71,7 +71,7 @@ namespace finance_management_backend.Services
 
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            return new PagedResult<ControlEnvironmentScoring>
+            return new PagedResult<CosoControlEnvironmentScoring>
             {
                 Page = page,
                 PageSize = pageSize,
@@ -81,10 +81,10 @@ namespace finance_management_backend.Services
             };
         }
 
-        public async Task<ControlEnvironmentScoring?> GetByIdAsync(string id)
+        public async Task<CosoControlEnvironmentScoring?> GetByIdAsync(string id)
             => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-        public async Task<ControlEnvironmentScoring> CreateAsync(ControlEnvironmentScoring item)
+        public async Task<CosoControlEnvironmentScoring> CreateAsync(CosoControlEnvironmentScoring item)
         {
             item.Id = null;
             item.Date = DateTime.UtcNow;
@@ -92,7 +92,7 @@ namespace finance_management_backend.Services
             return item;
         }
 
-        public async Task<bool> UpdateAsync(string id, ControlEnvironmentScoring item)
+        public async Task<bool> UpdateAsync(string id, CosoControlEnvironmentScoring item)
         {
             item.Id = id;
             var result = await _collection.ReplaceOneAsync(x => x.Id == id, item);
@@ -105,7 +105,7 @@ namespace finance_management_backend.Services
             return result.DeletedCount > 0;
         }
 
-        public async Task<List<ControlEnvironmentScoring>> CreateManyAsync(IEnumerable<ControlEnvironmentScoring> items)
+        public async Task<List<CosoControlEnvironmentScoring>> CreateManyAsync(IEnumerable<CosoControlEnvironmentScoring> items)
         {
             var list = items.ToList();
             foreach (var i in list)
@@ -117,7 +117,7 @@ namespace finance_management_backend.Services
             return list;
         }
 
-        public async Task<long> UpdateManyAsync(IEnumerable<ControlEnvironmentScoring> items)
+        public async Task<long> UpdateManyAsync(IEnumerable<CosoControlEnvironmentScoring> items)
         {
             long modified = 0;
             foreach (var item in items)
@@ -133,16 +133,16 @@ namespace finance_management_backend.Services
         {
             var idList = ids.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
             if (idList.Count == 0) return 0;
-            var filter = Builders<ControlEnvironmentScoring>.Filter.In(x => x.Id!, idList);
+            var filter = Builders<CosoControlEnvironmentScoring>.Filter.In(x => x.Id!, idList);
             var result = await _collection.DeleteManyAsync(filter);
             return result.DeletedCount;
         }
 
-        public async Task<bool> UpdateByNoAsync(double no, ControlEnvironmentScoring updated)
+        public async Task<bool> UpdateByNoAsync(double no, CosoControlEnvironmentScoring updated)
         {
-            var filter = Builders<ControlEnvironmentScoring>.Filter.Eq(x => x.No, no);
+            var filter = Builders<CosoControlEnvironmentScoring>.Filter.Eq(x => x.No, no);
 
-            var update = Builders<ControlEnvironmentScoring>.Update
+            var update = Builders<CosoControlEnvironmentScoring>.Update
                 .Set(x => x.Process,                          updated.Process)
 
                 .Set(x => x.IntegrityEthicalValues,           updated.IntegrityEthicalValues)
@@ -189,14 +189,14 @@ namespace finance_management_backend.Services
             return result.ModifiedCount > 0;
         }
 
-        public async Task<long> BulkUpdateByNoAsync(IEnumerable<ControlEnvironmentScoring> items)
+        public async Task<long> BulkUpdateByNoAsync(IEnumerable<CosoControlEnvironmentScoring> items)
         {
             long modified = 0;
             foreach (var item in items)
             {
-                var filter = Builders<ControlEnvironmentScoring>.Filter.Eq(x => x.No, item.No);
+                var filter = Builders<CosoControlEnvironmentScoring>.Filter.Eq(x => x.No, item.No);
 
-                var update = Builders<ControlEnvironmentScoring>.Update
+                var update = Builders<CosoControlEnvironmentScoring>.Update
                     .Set(x => x.Process,                          item.Process)
 
                     .Set(x => x.IntegrityEthicalValues,           item.IntegrityEthicalValues)

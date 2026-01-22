@@ -6,17 +6,17 @@ namespace finance_management_backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ControlEnvironmentScoringsController : ControllerBase
+    public class CosoControlEnvironmentScoringsController : ControllerBase
     {
-        private readonly ControlEnvironmentScoringService _service;
+        private readonly CosoControlEnvironmentScoringService _service;
 
-        public ControlEnvironmentScoringsController(ControlEnvironmentScoringService service)
+        public CosoControlEnvironmentScoringsController(CosoControlEnvironmentScoringService service)
         {
             _service = service;
         }
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<ControlEnvironmentScoring>>> GetAll(
+        public async Task<ActionResult<PagedResult<CosoControlEnvironmentScoring>>> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] string? search = null,
             [FromQuery] int pageSize = 10,
@@ -27,7 +27,7 @@ namespace finance_management_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ControlEnvironmentScoring>> GetById(string id)
+        public async Task<ActionResult<CosoControlEnvironmentScoring>> GetById(string id)
         {
             var item = await _service.GetByIdAsync(id);
             if (item == null) return NotFound();
@@ -35,14 +35,14 @@ namespace finance_management_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ControlEnvironmentScoring>> Create(ControlEnvironmentScoring item)
+        public async Task<ActionResult<CosoControlEnvironmentScoring>> Create(CosoControlEnvironmentScoring item)
         {
             var created = await _service.CreateAsync(item);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, ControlEnvironmentScoring updated)
+        public async Task<IActionResult> Update(string id, CosoControlEnvironmentScoring updated)
         {
             var existing = await _service.GetByIdAsync(id);
             if (existing == null) return NotFound();
@@ -62,14 +62,14 @@ namespace finance_management_backend.Controllers
         }
 
         [HttpPost("bulk")]
-        public async Task<ActionResult<List<ControlEnvironmentScoring>>> CreateMany(List<ControlEnvironmentScoring> items)
+        public async Task<ActionResult<List<CosoControlEnvironmentScoring>>> CreateMany(List<CosoControlEnvironmentScoring> items)
         {
             var created = await _service.CreateManyAsync(items);
             return Ok(created);
         }
 
         [HttpPut("bulk")]
-        public async Task<IActionResult> UpdateMany(List<ControlEnvironmentScoring> items)
+        public async Task<IActionResult> UpdateMany(List<CosoControlEnvironmentScoring> items)
         {
             var count = await _service.UpdateManyAsync(items);
             return Ok(new { updatedCount = count });
@@ -83,7 +83,7 @@ namespace finance_management_backend.Controllers
         }
 
         [HttpPut("by-no/{no}")]
-        public async Task<IActionResult> UpdateByNo(double no, [FromBody] ControlEnvironmentScoring body)
+        public async Task<IActionResult> UpdateByNo(double no, [FromBody] CosoControlEnvironmentScoring body)
         {
             var success = await _service.UpdateByNoAsync(no, body);
             if (!success) return NotFound();
@@ -91,7 +91,7 @@ namespace finance_management_backend.Controllers
         }
 
         [HttpPut("bulk-by-no")]
-        public async Task<IActionResult> BulkUpdateByNo([FromBody] List<ControlEnvironmentScoring> items)
+        public async Task<IActionResult> BulkUpdateByNo([FromBody] List<CosoControlEnvironmentScoring> items)
         {
             var count = await _service.BulkUpdateByNoAsync(items);
             return Ok(new { updatedCount = count });
