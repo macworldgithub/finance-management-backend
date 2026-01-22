@@ -69,6 +69,7 @@ builder.Services.AddSingleton<AssessmentOfEfficiencyService>();
 
 builder.Services.AddSingleton<ProcessSeverityService>();
 builder.Services.AddSingleton<OwnershipScoringService>();
+builder.Services.AddSingleton<IntosaiIfacControlEnvironmentScoringService>();
 builder.Services.AddSingleton<CosoControlEnvironmentScoringService>();
 builder.Services.AddSingleton<ChartPdfService>();
 builder.Services.AddSingleton<UserService>();
