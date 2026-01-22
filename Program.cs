@@ -66,6 +66,7 @@ builder.Services.AddSingleton<FinancialStatementAssertionService>();
 builder.Services.AddSingleton<AssessmentOfAdequacyService>();
 builder.Services.AddSingleton<AssessmentOfEffectivenessService>();
 builder.Services.AddSingleton<AssessmentOfEfficiencyService>();
+builder.Services.AddSingleton<OwnershipScoringService>();
 builder.Services.AddSingleton<ProcessSeverityService>();
 builder.Services.AddSingleton<ChartPdfService>();
 builder.Services.AddSingleton<UserService>();
