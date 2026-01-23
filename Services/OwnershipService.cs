@@ -1,152 +1,127 @@
 using MongoDB.Driver;
 using finance_management_backend.Models;
-using MongoDB.Bson; 
+using MongoDB.Bson;
 
 namespace finance_management_backend.Services
 {
-    public class OwnershipService
+    public class OwnershipScoringService
     {
-        private readonly IMongoCollection<Ownership> _ownerships;
+        private readonly IMongoCollection<OwnershipScoring> _collection;
 
-        public OwnershipService(IMongoDatabase database)
+        public OwnershipScoringService(IMongoDatabase database)
         {
-            // collection name in Mongo: "Ownership"
-            _ownerships = database.GetCollection<Ownership>("Ownership");
+            _collection = database.GetCollection<OwnershipScoring>("OwnershipScoring");
         }
 
-        // ===== Single-item CRUD =====
-
-public async Task<PagedResult<Ownership>> GetAllAsync(
-    int page = 1,
-    string? search = null,
-    int pageSize = 10,
-    bool sortByNoAsc = false)
-{
-    if (page < 1) page = 1;
-    if (pageSize <= 0) pageSize = 10;
-
-    // ----- Search filter -----
-    var filter = Builders<Ownership>.Filter.Empty;
-
-    if (!string.IsNullOrWhiteSpace(search))
-    {
-        var regex = new BsonRegularExpression(search, "i"); // case-insensitive
-
-        filter = Builders<Ownership>.Filter.Or(
-            Builders<Ownership>.Filter.Regex(x => x.MainProcess, regex),
-            Builders<Ownership>.Filter.Regex(x => x.Activity, regex),
-            Builders<Ownership>.Filter.Regex(x => x.Process, regex),
-            Builders<Ownership>.Filter.Regex(x => x.ProcessStage, regex),
-            Builders<Ownership>.Filter.Regex(x => x.Functions, regex),
-            Builders<Ownership>.Filter.Regex(x => x.ClientSegmentOrFunctionalSegment, regex),
-            Builders<Ownership>.Filter.Regex(x => x.OperationalUnit, regex),
-            Builders<Ownership>.Filter.Regex(x => x.Division, regex),
-            Builders<Ownership>.Filter.Regex(x => x.Entity, regex),
-            Builders<Ownership>.Filter.Regex(x => x.UnitOrDepartment, regex),
-            Builders<Ownership>.Filter.Regex(x => x.ProductClass, regex),
-            Builders<Ownership>.Filter.Regex(x => x.ProductName, regex)
-        );
-    }
-
-    // ----- Count for pagination -----
-    var totalItems = await _ownerships.CountDocumentsAsync(filter);
-
-    // ----- Build sort definition -----
-    IFindFluent<Ownership, Ownership> query = _ownerships.Find(filter);
-
-    if (sortByNoAsc)
-    {
-        // sort by No ascending
-        query = query.SortBy(x => x.No);
-    }
-    else
-    {
-        // default: latest Date first, then No desc
-        query = query
-            .SortByDescending(x => x.Date)
-            .ThenByDescending(x => x.No);
-    }
-
-    // ----- Query page -----
-    var items = await query
-        .Skip((page - 1) * pageSize)
-        .Limit(pageSize)
-        .ToListAsync();
-
-    var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
-    return new PagedResult<Ownership>
-    {
-        Page = page,
-        PageSize = pageSize,
-        TotalItems = totalItems,
-        TotalPages = totalPages,
-        Items = items
-    };
-}
-
-
-        public async Task<Ownership?> GetByIdAsync(string id)
+        public async Task<PagedResult<OwnershipScoring>> GetAllAsync(
+            int page = 1,
+            string? search = null,
+            int pageSize = 10,
+            bool sortByNoAsc = false)
         {
-            return await _ownerships.Find(o => o.Id == id).FirstOrDefaultAsync();
+            if (page < 1) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var filter = Builders<OwnershipScoring>.Filter.Empty;
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var regex = new BsonRegularExpression(search, "i");
+                filter = Builders<OwnershipScoring>.Filter.Or(
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.Activity, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.Process, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.ProcessStage, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.ActivationProcess, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.Function, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.ClientSegmentOrFunctionalSegment, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.OperationalUnit, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.Division, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.Entity, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.UnitOrDepartment, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.ProductClass, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.ProductName, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.TotalScore, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.Rating, regex)
+                );
+            }
+
+            var totalItems = await _collection.CountDocumentsAsync(filter);
+
+            IFindFluent<OwnershipScoring, OwnershipScoring> query = _collection.Find(filter);
+
+            if (sortByNoAsc)
+            {
+                query = query.SortBy(x => x.No);
+            }
+            else
+            {
+                query = query
+                    .SortByDescending(x => x.Date)
+                    .ThenByDescending(x => x.No);
+            }
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync();
+
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            return new PagedResult<OwnershipScoring>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Items = items
+            };
         }
 
-        public async Task<Ownership> CreateAsync(Ownership ownership)
+        public async Task<OwnershipScoring?> GetByIdAsync(string id)
+            => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
+
+        public async Task<OwnershipScoring> CreateAsync(OwnershipScoring item)
         {
-            ownership.Id = null; // let Mongo generate Id
-            ownership.Date = DateTime.UtcNow; // NEW: set current date/time
-            await _ownerships.InsertOneAsync(ownership);
-            return ownership;
+            item.Id = null;
+            item.Date = DateTime.UtcNow;
+            await _collection.InsertOneAsync(item);
+            return item;
         }
 
-        public async Task<bool> UpdateAsync(string id, Ownership updated)
+        public async Task<bool> UpdateAsync(string id, OwnershipScoring item)
         {
-            updated.Id = id;
-            var result = await _ownerships.ReplaceOneAsync(o => o.Id == id, updated);
+            item.Id = id;
+            var result = await _collection.ReplaceOneAsync(x => x.Id == id, item);
             return result.ModifiedCount > 0;
         }
 
         public async Task<bool> DeleteAsync(string id)
         {
-            var result = await _ownerships.DeleteOneAsync(o => o.Id == id);
+            var result = await _collection.DeleteOneAsync(x => x.Id == id);
             return result.DeletedCount > 0;
         }
 
-        // ===== Bulk / many-at-once operations =====
-
-        public async Task<List<Ownership>> CreateManyAsync(IEnumerable<Ownership> items)
+        public async Task<List<OwnershipScoring>> CreateManyAsync(IEnumerable<OwnershipScoring> items)
         {
             var list = items.ToList();
-            if (list.Count == 0) return list;
-
-            foreach (var o in list)
+            foreach (var i in list)
             {
-                o.Id = null;
-                  if (o.Date == default) // if not provided, set it
-                            o.Date = DateTime.UtcNow;
+                i.Id = null;
+                if (i.Date == default) i.Date = DateTime.UtcNow;
             }
-
-            await _ownerships.InsertManyAsync(list);
+            await _collection.InsertManyAsync(list);
             return list;
         }
 
-        public async Task<long> UpdateManyAsync(IEnumerable<Ownership> items)
+        public async Task<long> UpdateManyAsync(IEnumerable<OwnershipScoring> items)
         {
             long modified = 0;
-
-            foreach (var o in items)
+            foreach (var item in items)
             {
-                if (string.IsNullOrWhiteSpace(o.Id))
-                    continue;
-
-                var result = await _ownerships.ReplaceOneAsync(
-                    x => x.Id == o.Id,
-                    o
-                );
-
+                if (string.IsNullOrWhiteSpace(item.Id)) continue;
+                var result = await _collection.ReplaceOneAsync(x => x.Id == item.Id, item);
                 modified += result.ModifiedCount;
             }
-
             return modified;
         }
 
@@ -154,64 +129,88 @@ public async Task<PagedResult<Ownership>> GetAllAsync(
         {
             var idList = ids.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
             if (idList.Count == 0) return 0;
-
-            var filter = Builders<Ownership>.Filter.In(o => o.Id!, idList);
-            var result = await _ownerships.DeleteManyAsync(filter);
+            var filter = Builders<OwnershipScoring>.Filter.In(x => x.Id!, idList);
+            var result = await _collection.DeleteManyAsync(filter);
             return result.DeletedCount;
         }
 
-        // ===== Update by No (key) – change any attribute except No =====
-
-        // SINGLE: update all attributes except No, using No as key
-        public async Task<bool> UpdateByNoAsync(double no, Ownership updated)
+        // ─── Update using No (business key) ─────────────────────────────────────
+        public async Task<bool> UpdateByNoAsync(double no, OwnershipScoring updated)
         {
-            var filter = Builders<Ownership>.Filter.Eq(o => o.No, no);
+            var filter = Builders<OwnershipScoring>.Filter.Eq(x => x.No, no);
 
-            var update = Builders<Ownership>.Update
-                .Set(o => o.MainProcess,                          updated.MainProcess)
-                .Set(o => o.Activity,                         updated.Activity)
-                .Set(o => o.Process,                         updated.Process)
-                .Set(o => o.ProcessStage,                     updated.ProcessStage)
-                .Set(o => o.Functions,                        updated.Functions)
-                .Set(o => o.ClientSegmentOrFunctionalSegment, updated.ClientSegmentOrFunctionalSegment)
-                .Set(o => o.OperationalUnit,                  updated.OperationalUnit)
-                .Set(o => o.Division,                         updated.Division)
-                .Set(o => o.Entity,                           updated.Entity)
-                .Set(o => o.UnitOrDepartment,                 updated.UnitOrDepartment)
-                .Set(o => o.ProductClass,                     updated.ProductClass)
-                .Set(o => o.ProductName,                      updated.ProductName);
+            var update = Builders<OwnershipScoring>.Update
+                .Set(x => x.Activity, updated.Activity)
+                .Set(x => x.ActivityScore, updated.ActivityScore)
+                .Set(x => x.Process, updated.Process)
+                .Set(x => x.ProcessScore, updated.ProcessScore)
+                .Set(x => x.ProcessStage, updated.ProcessStage)
+                .Set(x => x.ProcessStageScore, updated.ProcessStageScore)
+                .Set(x => x.ActivationProcess, updated.ActivationProcess)
+                .Set(x => x.ActivationProcessScore, updated.ActivationProcessScore)
+                .Set(x => x.Function, updated.Function)
+                .Set(x => x.FunctionScore, updated.FunctionScore)
+                .Set(x => x.ClientSegmentOrFunctionalSegment, updated.ClientSegmentOrFunctionalSegment)
+                .Set(x => x.ClientSegmentScore, updated.ClientSegmentScore)
+                .Set(x => x.OperationalUnit, updated.OperationalUnit)
+                .Set(x => x.OperationalUnitScore, updated.OperationalUnitScore)
+                .Set(x => x.Division, updated.Division)
+                .Set(x => x.DivisionScore, updated.DivisionScore)
+                .Set(x => x.Entity, updated.Entity)
+                .Set(x => x.EntityScore, updated.EntityScore)
+                .Set(x => x.UnitOrDepartment, updated.UnitOrDepartment)
+                .Set(x => x.UnitOrDepartmentScore, updated.UnitOrDepartmentScore)
+                .Set(x => x.ProductClass, updated.ProductClass)
+                .Set(x => x.ProductClassScore, updated.ProductClassScore)
+                .Set(x => x.ProductName, updated.ProductName)
+                .Set(x => x.ProductNameScore, updated.ProductNameScore)
+                .Set(x => x.TotalScore, updated.TotalScore)
+                .Set(x => x.Scale, updated.Scale)
+                .Set(x => x.Rating, updated.Rating);
 
-            var result = await _ownerships.UpdateOneAsync(filter, update);
+            var result = await _collection.UpdateOneAsync(filter, update);
             return result.ModifiedCount > 0;
         }
 
-        // BULK: for each item, use No as key and update all other fields
-        public async Task<long> BulkUpdateByNoAsync(IEnumerable<Ownership> items)
+        public async Task<long> BulkUpdateByNoAsync(IEnumerable<OwnershipScoring> items)
         {
             long modified = 0;
-
             foreach (var item in items)
             {
-                var filter = Builders<Ownership>.Filter.Eq(o => o.No, item.No);
+                var filter = Builders<OwnershipScoring>.Filter.Eq(x => x.No, item.No);
 
-                var update = Builders<Ownership>.Update
-                    .Set(o => o.MainProcess,                          item.MainProcess)
-                    .Set(o => o.Activity,                         item.Activity)
-                    .Set(o => o.Process,                         item.Process)
-                    .Set(o => o.ProcessStage,                     item.ProcessStage)
-                    .Set(o => o.Functions,                        item.Functions)
-                    .Set(o => o.ClientSegmentOrFunctionalSegment, item.ClientSegmentOrFunctionalSegment)
-                    .Set(o => o.OperationalUnit,                  item.OperationalUnit)
-                    .Set(o => o.Division,                         item.Division)
-                    .Set(o => o.Entity,                           item.Entity)
-                    .Set(o => o.UnitOrDepartment,                 item.UnitOrDepartment)
-                    .Set(o => o.ProductClass,                     item.ProductClass)
-                    .Set(o => o.ProductName,                      item.ProductName);
+                var update = Builders<OwnershipScoring>.Update
+                    .Set(x => x.Activity, item.Activity)
+                    .Set(x => x.ActivityScore, item.ActivityScore)
+                    .Set(x => x.Process, item.Process)
+                    .Set(x => x.ProcessScore, item.ProcessScore)
+                    .Set(x => x.ProcessStage, item.ProcessStage)
+                    .Set(x => x.ProcessStageScore, item.ProcessStageScore)
+                    .Set(x => x.ActivationProcess, item.ActivationProcess)
+                    .Set(x => x.ActivationProcessScore, item.ActivationProcessScore)
+                    .Set(x => x.Function, item.Function)
+                    .Set(x => x.FunctionScore, item.FunctionScore)
+                    .Set(x => x.ClientSegmentOrFunctionalSegment, item.ClientSegmentOrFunctionalSegment)
+                    .Set(x => x.ClientSegmentScore, item.ClientSegmentScore)
+                    .Set(x => x.OperationalUnit, item.OperationalUnit)
+                    .Set(x => x.OperationalUnitScore, item.OperationalUnitScore)
+                    .Set(x => x.Division, item.Division)
+                    .Set(x => x.DivisionScore, item.DivisionScore)
+                    .Set(x => x.Entity, item.Entity)
+                    .Set(x => x.EntityScore, item.EntityScore)
+                    .Set(x => x.UnitOrDepartment, item.UnitOrDepartment)
+                    .Set(x => x.UnitOrDepartmentScore, item.UnitOrDepartmentScore)
+                    .Set(x => x.ProductClass, item.ProductClass)
+                    .Set(x => x.ProductClassScore, item.ProductClassScore)
+                    .Set(x => x.ProductName, item.ProductName)
+                    .Set(x => x.ProductNameScore, item.ProductNameScore)
+                    .Set(x => x.TotalScore, item.TotalScore)
+                    .Set(x => x.Scale, item.Scale)
+                    .Set(x => x.Rating, item.Rating);
 
-                var result = await _ownerships.UpdateOneAsync(filter, update);
+                var result = await _collection.UpdateOneAsync(filter, update);
                 modified += result.ModifiedCount;
             }
-
             return modified;
         }
     }

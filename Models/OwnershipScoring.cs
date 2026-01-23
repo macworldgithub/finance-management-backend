@@ -1,7 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json.Serialization;
-using System;
 
 namespace finance_management_backend.Models
 {
@@ -52,18 +51,28 @@ namespace finance_management_backend.Models
         public double ProcessStageScore { get; set; } // 0–25
 
         // ───────────────────────────────────────────────
+        // Activation Process level (NEW)
+        [BsonElement("ActivationProcess")]
+        [JsonPropertyName("ActivationProcess")]
+        public string ActivationProcess { get; set; } = string.Empty;
+
+        [BsonElement("ActivationProcessScore")]
+        [JsonPropertyName("ActivationProcessScore")]
+        public double ActivationProcessScore { get; set; } // 0–25
+
+        // ───────────────────────────────────────────────
         // Aggregated / Total
         [BsonElement("TotalScore")]
         [JsonPropertyName("TotalScore")]
-        public string TotalScore { get; set; } = string.Empty;     // ← string as requested
+        public string TotalScore { get; set; } = string.Empty; // string as requested
 
         [BsonElement("Scale")]
         [JsonPropertyName("Scale")]
-        public int Scale { get; set; }                             // 1–5 usually
+        public int Scale { get; set; } // 1–5 usually
 
         [BsonElement("Rating")]
         [JsonPropertyName("Rating")]
-        public string Rating { get; set; } = string.Empty;         // ← free text / string
+        public string Rating { get; set; } = string.Empty;
 
         // ───────────────────────────────────────────────
         // Function / Organizational dimensions
