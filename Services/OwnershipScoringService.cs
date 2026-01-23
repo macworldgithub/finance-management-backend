@@ -10,7 +10,7 @@ namespace finance_management_backend.Services
 
         public OwnershipScoringService(IMongoDatabase database)
         {
-            _collection = database.GetCollection<OwnershipScoring>("OwnershipScoring"); // ← choose collection name
+            _collection = database.GetCollection<OwnershipScoring>("OwnershipScoring");
         }
 
         public async Task<PagedResult<OwnershipScoring>> GetAllAsync(
@@ -31,6 +31,7 @@ namespace finance_management_backend.Services
                     Builders<OwnershipScoring>.Filter.Regex(x => x.Activity, regex),
                     Builders<OwnershipScoring>.Filter.Regex(x => x.Process, regex),
                     Builders<OwnershipScoring>.Filter.Regex(x => x.ProcessStage, regex),
+                    Builders<OwnershipScoring>.Filter.Regex(x => x.ActivationProcess, regex),     // ← added
                     Builders<OwnershipScoring>.Filter.Regex(x => x.Function, regex),
                     Builders<OwnershipScoring>.Filter.Regex(x => x.ClientSegmentOrFunctionalSegment, regex),
                     Builders<OwnershipScoring>.Filter.Regex(x => x.OperationalUnit, regex),
@@ -146,6 +147,7 @@ namespace finance_management_backend.Services
                 .Set(x => x.ProcessScore,                      updated.ProcessScore)
                 .Set(x => x.ProcessStage,                      updated.ProcessStage)
                 .Set(x => x.ProcessStageScore,                 updated.ProcessStageScore)
+                .Set(x => x.ActivationProcess,                 updated.ActivationProcess)          // ← added
                 .Set(x => x.Function,                          updated.Function)
                 .Set(x => x.FunctionScore,                     updated.FunctionScore)
                 .Set(x => x.ClientSegmentOrFunctionalSegment,  updated.ClientSegmentOrFunctionalSegment)
@@ -184,6 +186,7 @@ namespace finance_management_backend.Services
                     .Set(x => x.ProcessScore,                      item.ProcessScore)
                     .Set(x => x.ProcessStage,                      item.ProcessStage)
                     .Set(x => x.ProcessStageScore,                 item.ProcessStageScore)
+                    .Set(x => x.ActivationProcess,                 item.ActivationProcess)              // ← added
                     .Set(x => x.Function,                          item.Function)
                     .Set(x => x.FunctionScore,                     item.FunctionScore)
                     .Set(x => x.ClientSegmentOrFunctionalSegment,  item.ClientSegmentOrFunctionalSegment)

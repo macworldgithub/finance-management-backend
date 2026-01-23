@@ -52,6 +52,12 @@ namespace finance_management_backend.Models
         public double ProcessStageScore { get; set; } // 0–25
 
         // ───────────────────────────────────────────────
+        // NEW FIELD
+        [BsonElement("ActivationProcess")]
+        [JsonPropertyName("ActivationProcess")]
+        public string ActivationProcess { get; set; } = string.Empty;
+
+        // ───────────────────────────────────────────────
         // Aggregated / Total
         [BsonElement("TotalScore")]
         [JsonPropertyName("TotalScore")]
