@@ -14,11 +14,9 @@ namespace finance_management_backend.Models
 
 
 
-            [BsonElement("Date")]
-    [JsonPropertyName("Date")]
-    public DateTime Date { get; set; }
-
-
+        [BsonElement("Date")]
+        [JsonPropertyName("Date")]
+        public DateTime Date { get; set; }
 
         [BsonElement("No")]
         [JsonPropertyName("No")]
